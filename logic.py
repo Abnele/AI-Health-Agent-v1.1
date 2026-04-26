@@ -26,8 +26,6 @@ def analyze():
     sleepAverage = mean(hours_slept).__round__(2)
     screenAverage = mean(screen_time).__round__(2)
     moneyAverage = mean(money_lost).__round__(2)
-    print(len(hours_slept))
-    print(len(data))
 
     dataAverage = {
         "steps": stepsAverage,  # per day
