@@ -1,0 +1,5 @@
+(5/9/2026):
+Added goal setting
+Added additional advice combinations
+Added optional dummy data settings
+Added GUI for input
