@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name = "viewport", content="width=device-width, initial-scale = 1.0">
+    <title>Health Agent</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+
+
+<body>
+
+    <main>
+
+
+        <!-- Goals Section -->
+        <section id="goals-section">
+            <h2>Your Goals</h2>
+            <div id="goals-form">
+                <label>Steps per day
+                    <input type="number" id="goal-steps" placeholder="5000">
+                </label>
+
+                <label>Hours slept per day
+                    <input type="number" id="goal-sleep" placeholder="8">
+                </label>
+
+                <label>Hourly screen time per day
+                    <input type="number" id="goal-screen" placeholder = "4">
+                </label>
+                <button onclick="saveGoals()">Save Goals</button>
+            </div>
+        </section>
+
+        <!-- Data Section -->
+        <section id="data-section">
+            <h2>Today's Data</h2>
+            <div id="data-form">
+
+                <label>Date
+                    <input type ="date" id="data-date">
+                </label>
+
+                <label>Steps today
+                    <input type="number" id="data-steps" placeholder="4500">
+                </label>
+
+                <label>Hours slept today
+                    <input type="number" id="data-sleep" placeholder="7">
+                </label>
+
+                <label>Hourly screen time today
+                    <input type="number" id="data-screen" placeholder = "6">
+                </label>
+                <button onclick="addData()">Add Day</button>
+            </div>
+        </section>
+
+
+        <!-- Advice Section -->
+        <section id="advice-section">
+            <h2>Your Report</h2>
+            <button onclick="getAdvice()">Generate Report</button>
+            <div id="report-type"></div>
+            <ul id="advice-list"></ul>
+        </section>
+
+        <!-- History Section -->
+        <section id="history-section">
+            <h2>Your Logged Days</h2>
+            <button onclick="refreshHistory()">Refresh History</button>
+            <ul id = "logged-days"></ul>
+        </section>
+
+
+    </main>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+HOW TO RUN:
+
+1. Open folder with VSCode
+2. Install Flask extension
+3. Run Main.py
+4. You should see something like the following:
+ * Serving Flask app 'main'
+ * Debug mode: on
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on [PASTE THIS INTO YOUR BROWSER]
+ * Running on [PASTE THIS AS YOUR URL IN HEALTH AUTO EXPORT]
+Press CTRL+C to quit
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: [debugger pin]
+5. Open your browser
+6. Paste the url given on the second "*" under "WARNING..."
+
+HOW TO EXPORT HEALTH DATA
+1. Install Health Auto Export from App Store
+2. Go to -> Automated -> New Automation
+3. Set Automation Type to REST API
+4. Get your IPv4 Address (See next guide below)
+5. Set your URL to -> http://[YOUR IPv4 ADDRESS]:5000/data
+6. Set Data Type to Health Metrics
+7. In Select Metrics, select -> Sleep Analysis and Step Count
+8. Set Export Format to JSON
+9. Select Manual Export
+10. Choose the days you would like to export data from
+11. Select Begin export
+
+HOW TO GET YOUR IPv4 ADDRESS/URL:
+Easy way:
+1. Run main.py
+2. Locate the THIRD "*" under "WARNING: This is..." on the terminal
+3. See that it says "Running on [PASTE THIS AS YOUR URL IN AUTO EXPORT]"
+Hard way:
+1. Open windows powershell and run: "ipconfig"
+2. Look for IPv4 Address under your active WiFi adapter
+3. Copy the IPv4 Address to your clipboard
+
+NOTE:
+* Health Auto Export cannot export screen time data. As of now, you must enter it manually in the web app
+* If you do not have sleep data for an exported day, it will default to 0; to change that, add sleep data in your iphone Health app or enter it in the website

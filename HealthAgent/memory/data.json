@@ -1,0 +1,24 @@
+[
+    {
+        "date": "2026-06-19",
+        "steps": 454,
+        "hours_slept": 4,
+        "screen_time": 5
+    },
+    {
+        "date": "2026-05-24",
+        "steps": 2,
+        "hours_slept": 5,
+        "screen_time": 4
+    },
+    {
+        "date": "2026-06-02",
+        "steps": 214,
+        "hours_slept": 0
+    },
+    {
+        "date": "2026-06-01",
+        "steps": 3756,
+        "hours_slept": 0
+    }
+]
