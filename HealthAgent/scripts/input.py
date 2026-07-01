@@ -53,7 +53,7 @@ def convert_export_to_daily(export_data):
                             pass
                         # If not
                         else:
-                            day = point["day"]
+                            day = point["date"].split(" ")[0]
                             steps_data += point['qty']
 
                     elif day != point["date"].split(" ")[0]:

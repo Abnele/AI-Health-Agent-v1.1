@@ -58,10 +58,10 @@ async function addData() {
         return; 
     }
     
-    const checkDate = await fetch(`/check-date?date=${data_today.date}`)
-    const checkData = await checkDate.json();
+    const checkDateRes = await fetch(`/check-date?date=${data_today.date}`)
+    const checkDate = await checkDateRes.json();
 
-    if (checkData.exists) {
+    if (checkDate.exists) {
         const confirmOverride = confirm(`You already have data for ${data_today.date}. Override it?`)
         if (!confirmOverride) return;
     }
@@ -202,7 +202,7 @@ async function undoEdit(date){
 
 async function deleteDay(date) {
     const confirmDeletion = confirm('Delete this entry?');
-    if (!confirm) {
+    if (!confirmDeletion) {
         return;
     }
     const deleteRes = await fetch(`/data/${date}`, {method : 'DELETE'});

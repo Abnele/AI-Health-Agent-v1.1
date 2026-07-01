@@ -4,6 +4,7 @@ from statistics import mean
 from datetime import datetime, timedelta
 import json
 import os
+import traceback
 
 MEMORY_DIR = os.path.join(os.path.dirname(__file__), '..', 'memory')
 DATA_FILE = os.path.join(MEMORY_DIR, 'data.json')
@@ -51,17 +52,6 @@ def analyze():
         data = weekly_data # Only evaluates one day of the week that was logged
         weekly_data =  [] # Clears weekly list
         report_type = "DAILY" 
-    
-
-    
-    #if (len(data)) > 7:
-        #weekly_data = data[-7:] # Gets 7-day data
-        #report_type = "WEEKLY"
-    #elif (len(data) < 7 and len(data) > 1):
-        #weekly_data = WEEKLY"
-    #else:
-        #weekly_data = []
-        #report_type = "DAILY"
 
 
 
@@ -120,91 +110,107 @@ def analyze():
 
 def make_weekly_advice(weekly_data, dataAverage, goals, advice):
         past_x_days = 0
-        try:
+        previous_day = None
+        
+        sorted_data = sorted(weekly_data, key=lambda x: datetime.strptime(x["date"], "%Y-%m-%d"), reverse = True)
+        print("SORTED DATA: ")
+        for day in sorted_data:
+            print(day)
 
-            # STEPS GOAL
-                # Get the days in a row you've missed your goal starting from the last time the program is run
-                for day in reversed(weekly_data):
-                    if (day["steps"] < goals["steps"]):
-                        past_x_days += 1
-                    else:
-                        break
+    # STEPS GOAL
+        # Get the days in a row you've missed your goal starting from the last time you logged a day
+        for day in sorted_data:
+            if (day["steps"] < goals["steps"]) and \
+                (previous_day == None or datetime.strptime(day["date"], "%Y-%m-%d") == previous_day - timedelta(days = 1)):
+                
+                past_x_days += 1
+                previous_day = datetime.strptime(day["date"], "%Y-%m-%d")            
+            else:
+                break
+        
 
 
-                # If done more than twice, call the user out
-                if (past_x_days > 2):
-                    advice.append(f"You have been under your steps goal for the past {past_x_days} days. Get more steps in")
-                # See if they've underperformed on average, and call that out
-                if (dataAverage["steps"] < goals["steps"]):
-                    stepsPercent = (dataAverage["steps"] / goals["steps"]) * 100
-                    stepsPercent = stepsPercent.__round__(2)
+        # If done more than twice, call the user out
+        if (past_x_days > 2):
+            advice.append(f"You have been under your steps goal for the past {past_x_days} days. Get more steps in")
+        # See if they've underperformed on average, and call that out
+        if (dataAverage["steps"] < goals["steps"]):
+            stepsPercent = (dataAverage["steps"] / goals["steps"]) * 100
+            stepsPercent = stepsPercent.__round__(2)
 
-                    if stepsPercent.is_integer(): # Turn percentage into integer when possible
-                        stepsPercent = int(stepsPercent)
-                    advice.append(f"You've only been taking %{stepsPercent} of your goal steps this week. Increase your step count.")
+            if stepsPercent.is_integer(): # Turn percentage into integer when possible
+                stepsPercent = int(stepsPercent)
+            advice.append(f"You've only been taking %{stepsPercent} of your goal steps this week. Increase your step count.")
 
-                # If they've been on track, don't add advice
-                else:
-                    pass
+        # If they've been on track, don't add advice
+        else:
+            pass
 
-            # SLEEP GOAL
-                past_x_days = 0
-                # Get the days in a row you've missed your goal starting from the last time the program is run
-                for day in reversed(weekly_data):
-                    if (day["steps"] < goals["steps"]):
-                        past_x_days += 1
-                    else:
-                        break
+    # SLEEP GOAL
+        past_x_days = 0
+        # Get the days in a row you've missed your goal starting from the last time the program is run
+        previous_day = None
+        # Get the days in a row you've missed your goal starting from the last time you logged a day
+        for day in sorted_data:
+            if (day["hours_slept"] < goals["hours_slept"]) and \
+                (previous_day == None or datetime.strptime(day["date"], "%Y-%m-%d") == previous_day - timedelta(days = 1)):
+                past_x_days += 1
+                previous_day = datetime.strptime(day["date"], "%Y-%m-%d")
+            else:
+                break
 
-                # If done more than twice, call the user out
-                if (past_x_days > 2):
-                    advice.append(f"You have been under your sleep goal for the past {past_x_days} days. Tighten your sleep schedule")
+        # If done more than twice, call the user out
+        if (past_x_days > 2):
+            advice.append(f"You have been under your sleep goal for the past {past_x_days} days. Tighten your sleep schedule")
 
-                # See if they've underperformed on average, and call that out
-                if (dataAverage["hours_slept"] < goals["hours_slept"]):
-                    sleepPercent = (dataAverage["hours_slept"] / goals["hours_slept"]) * 100
-                    sleepPercent = sleepPercent.__round__(2)
+        # See if they've underperformed on average, and call that out
+        if (dataAverage["hours_slept"] < goals["hours_slept"]):
+            sleepPercent = (dataAverage["hours_slept"] / goals["hours_slept"]) * 100
+            sleepPercent = sleepPercent.__round__(2)
 
-                    if sleepPercent.is_integer():  # Turn percentage into integer when possible
-                        sleepPercent = int(sleepPercent)
+            if sleepPercent.is_integer():  # Turn percentage into integer when possible
+                sleepPercent = int(sleepPercent)
 
-                    advice.append(f"You are getting {sleepPercent}% less sleep per day than recommended. Try to get 8 hours of sleep daily")
+            advice.append(f"You are getting {sleepPercent}% less sleep per day than recommended. Try to get 8 hours of sleep daily")
 
-                # If they've been on track, don't add advice
-                else:
-                    pass
+        # If they've been on track, don't add advice
+        else:
+            pass
 
-            # SCREEN TIME GOAL
-                past_x_days = 0
-                # Get the days in a row you've missed your goal starting from the last time the program is run
-                for day in reversed(weekly_data):
-                    if (day["screen_time"] > goals["screen_time"]):
-                        past_x_days += 1
-                    else:
-                        break
+    # SCREEN TIME GOAL
+        past_x_days = 0
+        # Get the days in a row you've missed your goal starting from the last time the program is run
+        previous_day = None
+        # Get the days in a row you've missed your goal starting from the last time you logged a day
+        for day in sorted_data:
+            if (day["screen_time"] < goals["screen_time"]) and \
+                (previous_day == None or datetime.strptime(day["date"], "%Y-%m-%d") == previous_day - timedelta(days = 1)):
+                
+                past_x_days += 1
+                previous_day = datetime.strptime(day["date"], "%Y-%m-%d")
+            else:
+                break
 
-                # If done more than twice, call the user out
-                if (past_x_days > 2):
-                    advice.append(f"You have been over your screen time minimum for the past {past_x_days} days. Reduce your phone usage")
+        # If done more than twice, call the user out
+        if (past_x_days > 2):
+            advice.append(f"You have been over your screen time minimum for the past {past_x_days} days. Reduce your phone usage")
 
-                # See if they've underperformed on average, and call that out
-                if (dataAverage["screen_time"] > goals["screen_time"]):
-                    screenPercent = (dataAverage["screen_time"] / goals["screen_time"]) * 100
-                    screenPercent = screenPercent.__round__(2)
+        # See if they've underperformed on average, and call that out
+        if (dataAverage["screen_time"] > goals["screen_time"]):
+            screenPercent = (dataAverage["screen_time"] / goals["screen_time"]) * 100
+            screenPercent = screenPercent.__round__(2)
 
-                    if screenPercent.is_integer():  # Turn percentage into integer when possible
-                        screenPercent = int(screenPercent)
+            if screenPercent.is_integer():  # Turn percentage into integer when possible
+                screenPercent = int(screenPercent)
 
-                    advice.append(f"Reduce your screen time. You are wasting {dataAverage["screen_time"]} hours per day on average, and getting %{screenPercent} more screen time per day than what your goal states")
+            advice.append(f"Reduce your screen time. You are wasting {dataAverage["screen_time"]} hours per day on average, and getting %{screenPercent} more screen time per day than what your goal states")
 
-                # If they've been on track, don't add advice
-                else:
-                    pass
-                # If they've been on track with ALL goals, point that out in the report
-                if advice.__len__() == 0:
-                    advice.append("You've been keeping up with your goals. Keep it up.")
+        # If they've been on track, don't add advice
+        else:
+            pass
+        # If they've been on track with ALL goals, point that out in the report
+        if advice.__len__() == 0:
+            advice.append("You've been keeping up with your goals. Keep it up.")
 
-                return advice
-        except:
-            return "ADVICE CANNOT BE GENERATED"
+        return advice
 
