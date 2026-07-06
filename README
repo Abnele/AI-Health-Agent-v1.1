@@ -41,5 +41,6 @@ Hard way:
 3. Copy the IPv4 Address to your clipboard
 
 NOTE:
-* Health Auto Export cannot export screen time data. As of now, you must enter it manually in the web app
-* If you do not have sleep data for an exported day, it will default to 0; to change that, add sleep data in your iphone Health app or enter it in the website
+* Health Auto Export cannot export screen time data. As of now, you must enter it manually in the web app.
+* If you do not have sleep data for an exported day, it will default to 0; to change that, add sleep data in your iphone Health app or enter it in the website.
+* If your free trial on Health Auto Export runs out, uninstall and reinstall the app, and it should reset.
