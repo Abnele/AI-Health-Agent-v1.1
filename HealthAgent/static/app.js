@@ -1,5 +1,7 @@
+
+
+
 window.onload = async () => {
-        
     // Default to today's date
     const today = new Date();
     const yyyy = today.getFullYear();
@@ -16,6 +18,26 @@ window.onload = async () => {
     if (goals.hours_slept)  document.getElementById('goal-sleep').value = goals.hours_slept
     if (goals.screen_time)  document.getElementById('goal-screen').value = goals.screen_time
 
+    // Check for exports
+    const eventSource = new EventSource('/stream');
+
+    eventSource.onmessage = async (event) => {
+        const message = JSON.parse(event.data)
+        console.log(message.event);
+        
+        if (message.event === 'export_received') {
+            await refreshHistory();
+            alert("Data has been exported. Manyally add screen time and edit sleep data if none was provided by your iphone")
+        }
+    
+
+    };
+
+    eventSource.onerror = () => {
+        console.log('SSE connection lost connection, will retry automatically...');
+    };
+
+    
 
 }
 
@@ -73,6 +95,8 @@ async function addData() {
         body: JSON.stringify(data_today)
     });
     if (res.ok) alert('Data added!') 
+    
+    refreshHistory();
     
     
 }
@@ -144,6 +168,7 @@ async function refreshHistory() {
     }
 
 }
+
 async function editDay(date) {
     const historyRes = await fetch('/history')
     const history = await historyRes.json();
@@ -208,5 +233,25 @@ async function deleteDay(date) {
     const deleteRes = await fetch(`/data/${date}`, {method : 'DELETE'});
     if (deleteRes.ok) alert('Day Deleted!');
     refreshHistory();
+}
+
+async function resetExportAlert() {
+
+    // Yo bro you need to read alert.json and overwrite it to false using JS
+    // That's what this function should do
+    // Idk if the alert_file parameter is needed
+    // Put it there just in case
+    // Nvm not needed
     
+    const alertRes = await fetch('/communications');
+    const alert = await alertRes.json();
+
+    await fetch('/communications', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({"auto_export_data_added?": false})
+    })
+
+
+
 }

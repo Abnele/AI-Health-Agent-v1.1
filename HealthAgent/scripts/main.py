@@ -4,6 +4,13 @@ from logic import analyze
 from input import save_data, load_data, convert_export_to_daily
 import json
 import os
+import queue
+import threading
+
+# ─── Queue ─────────────────────────────────────────────
+event_queue = queue.Queue()
+
+# ─── App ───────────────────────────────────────────────
 
 app = Flask(
     __name__,
@@ -11,9 +18,13 @@ app = Flask(
     static_folder=os.path.join(os.path.dirname(__file__), '..', 'static')
 )
 
+# ── Directories ─────────────────────────────────────────
+
 MEMORY_DIR = os.path.join(os.path.dirname(__file__), '..', 'memory')
+COMM_DIR = os.path.join(os.path.dirname(__file__), '..', 'communication')
 DATA_FILE = os.path.join(MEMORY_DIR, 'data.json')
-GOALS_FILE = os.path.join(MEMORY_DIR, "goals.json")
+GOALS_FILE = os.path.join(MEMORY_DIR, 'goals.json')
+ALERT_FILE = os.path.join(COMM_DIR, 'alert.json')
 
 # ── Routes ──────────────────────────────────────────────
 
@@ -38,6 +49,9 @@ def receive_data():
         conversion = convert_export_to_daily(data)
         for entry in conversion:
             save_data(entry)
+
+        event_queue.put({"event": "export_received"})
+
     else:
         save_data(data)
     
@@ -100,11 +114,26 @@ def delete_data(date):
         json.dump(data, file, indent= 4)
     return jsonify({"status": "deleted"}), 200
 
-    
-    
+@app.route('/stream')
+def stream():
+    # Server sent events
+    def generate():
+        while True:
+            message = event_queue.get()
+            print(f"data: {json.dumps(message)}\n\n")
+            yield f"data: {json.dumps(message)}\n\n"
+    print("***********************STREAM HAS RUN")
+    return app.response_class(
+        generate(),
+        mimetype= 'text/event-stream',
+        headers= {
+            'Cache-Control': 'no-cache',
+            'X-Accel-Buffering': 'no'
+        }
+    )
 
 
 # ── Run ─────────────────────────────────────────────────
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000, host= '0.0.0.0')
+    app.run(debug=True, port=5000, host= '0.0.0.0', threaded = True)

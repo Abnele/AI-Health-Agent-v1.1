@@ -5,11 +5,24 @@ from datetime import datetime, timedelta
 import json
 import os
 import traceback
+import google.genai as genai
 
+
+# Directories
 MEMORY_DIR = os.path.join(os.path.dirname(__file__), '..', 'memory')
 DATA_FILE = os.path.join(MEMORY_DIR, 'data.json')
 GOALS_FILE = os.path.join(MEMORY_DIR, "goals.json")
+SETTINGS_FILE = os.path.join(MEMORY_DIR, "settings.json")
+                             
+# Configure AI
+#try:
+with open(SETTINGS_FILE, "r") as f:
+    key = json.load(f)
+client = genai.Client(api_key = key["gemini_api_key"])
 
+
+
+                
 
 def analyze():
     advice = []
@@ -18,21 +31,9 @@ def analyze():
     goals = []
 
     # Fetch goals
-    try:
-        with open(GOALS_FILE, "r") as file:
-            goals = json.load(file) # get the data in the json file
-    except:
-        # OLD CODE
-        #print("Please provide your habit goals")
-        #print("Enter numbers only")
-        #goals = {
-            #"steps" : float(input("Steps per day: " )),
-            #"hours_slept" : float(input("Hours slept per day: " )),
-            #"screen_time" : float(input("Screen time per day (in hours): " )),
-        #}
-        #with open(GOALS_FILE, "w") as file:
-            #json.dump(goals, file)
-        pass
+    with open(GOALS_FILE, "r") as file:
+        goals = json.load(file) # get the data in the json file
+    
 
     # Fetch data
     data = load_data() # Gets data in json file currently
@@ -88,25 +89,39 @@ def analyze():
         "screen_time": screenAverage,  # in daily hours
     }
 
-    # Give advice based on the data
-    if (report_type == "WEEKLY"):
-        return make_weekly_advice(weekly_data, dataAverage, goals, advice), report_type
-    else:
-        if dataAverage["steps"] < goals["steps"]:
-            advice.append("You are too inactive. Consider getting at least 5000 steps per day.")
-        if dataAverage["hours_slept"] < goals["hours_slept"]:
-            sleepPercent = (dataAverage["hours_slept"] / 8) * 100
-            if (sleepPercent.is_integer()):
-                sleepPercent = int(sleepPercent)
-            advice.append(f"You are getting {100 - sleepPercent}% less sleep per day than recommended. Try to get 8 hours of sleep daily")
-        if dataAverage["screen_time"] > goals["screen_time"]:
-            if (dataAverage["screen_time"].is_integer()):
-                dataAverage["screen_time"] = int(dataAverage["screen_time"])
-            advice.append(f"Reduce your screen time. You are wasting {dataAverage["screen_time"]} hours per day on average")
-        if advice.__len__() == 0:
-            advice.append("You've been keeping up with your goals. Keep it up.")
+    # Give advice based on the weekly or daily data
+    ai_advice = get_ai_advice((weekly_data if report_type == "WEEKLY" else data), goals, report_type)
+    print(f"""
+        *********AI ADVICE BELOW:
+        {ai_advice}
+        """)
+    advice = []
+    
+    for item in ai_advice.strip().split("\n"):
+        advice.append(item)
+    
 
-        return advice, report_type
+
+    # DEPRECATED AND SOON TO BE REMOVED
+    # if (report_type == "WEEKLY"):
+    #     return make_weekly_advice(weekly_data, dataAverage, goals, advice), report_type
+    # else:
+    #     if dataAverage["steps"] < goals["steps"]:
+    #         advice.append("You are too inactive. Consider getting at least 5000 steps per day.")
+    #     if dataAverage["hours_slept"] < goals["hours_slept"]:
+    #         sleepPercent = (dataAverage["hours_slept"] / goals["hours_slept"]) * 100
+    #         if (sleepPercent.is_integer()):
+    #             sleepPercent = int(sleepPercent)
+    #         advice.append(f"You are getting {100 - sleepPercent}% less sleep per day than recommended. Try to get {goals["hours_slept"]} hours of sleep daily")
+    #     if dataAverage["screen_time"] > goals["screen_time"]:
+    #         if (dataAverage["screen_time"].is_integer()):
+    #             dataAverage["screen_time"] = int(dataAverage["screen_time"])
+    #         advice.append(f"Reduce your screen time. You are wasting {dataAverage["screen_time"]} hours per day on average")
+    #     if advice.__len__() == 0:
+    #         advice.append("You've been keeping up with your goals. Keep it up.")
+
+    return advice, report_type
+    
 
 def make_weekly_advice(weekly_data, dataAverage, goals, advice):
         past_x_days = 0
@@ -214,3 +229,19 @@ def make_weekly_advice(weekly_data, dataAverage, goals, advice):
 
         return advice
 
+def get_ai_advice(data, goals, report_type):
+    # Prompts Gemini to give advice to the user
+    prompt = f"""
+        You are a personal health coach. Analyze this user's health data and give specific, actionable advice in 3-5 bullet points. Be encouraging but honest   
+        Report type: {report_type}
+        User Goals: {goals}
+        Health Data: {data}
+        Keep advice concise and practical. Focus on what they can improve today.
+    """
+
+    response = client.models.generate_content(
+        model = "gemini-3.1-flash-lite",
+        contents = prompt)
+    
+    print(f"RESPONSE: {response.text}")
+    return response.text
