@@ -89,7 +89,7 @@ async function addData() {
     }
     
     
-    const res = await fetch('/data', {
+    const res = await fetch('/data/health-auto-export', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(data_today)
@@ -199,7 +199,7 @@ async function confirmEdit(date){
         "screen_time":  parseInt(document.getElementById(`edit-screen-${date}`).value),
     };
 
-    const dataRes = await fetch('/data', {
+    const dataRes = await fetch('/data/health-auto-export', {
         method:     'POST',
         headers:    {'Content-type': 'application/json'},
         body:       JSON.stringify(updates)        
