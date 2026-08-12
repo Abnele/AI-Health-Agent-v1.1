@@ -97,8 +97,6 @@ def convert_export_to_daily(export_data):
     return results
 
 
-
-
 def save_data(daily_entry): # Saves data to Json file
     jsonData = []
     try:

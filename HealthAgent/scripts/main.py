@@ -1,6 +1,7 @@
 # main.py - Flask backend
+# Handles server and routes
 from flask import Flask, request, jsonify, render_template
-from logic import analyze
+from logic import analyze, parse_data
 from input import save_data, load_data, convert_export_to_daily
 import json
 import os
@@ -21,10 +22,10 @@ app = Flask(
 # ── Directories ─────────────────────────────────────────
 
 MEMORY_DIR = os.path.join(os.path.dirname(__file__), '..', 'memory')
-COMM_DIR = os.path.join(os.path.dirname(__file__), '..', 'communication')
+TEST_DIR = os.path.join(os.path.dirname(__file__), '..', 'test')
 DATA_FILE = os.path.join(MEMORY_DIR, 'data.json')
 GOALS_FILE = os.path.join(MEMORY_DIR, 'goals.json')
-ALERT_FILE = os.path.join(COMM_DIR, 'alert.json')
+TEST_FILE = os.path.join(TEST_DIR, 'testData.txt')
 
 # ── Routes ──────────────────────────────────────────────
 
@@ -32,7 +33,7 @@ ALERT_FILE = os.path.join(COMM_DIR, 'alert.json')
 def index():
     return render_template('index.html')
 
-@app.route('/data', methods=['POST'])
+@app.route('/data/health-auto-export', methods=['POST'])
 def receive_data():
     # Health Auto Export will POST data here
     data = request.json
@@ -131,6 +132,64 @@ def stream():
             'X-Accel-Buffering': 'no'
         }
     )
+
+@app.route('/data/shortcut', methods = ['POST'])
+def post_data():
+    # Apple Shortcuts will POST data here
+    data = request.json
+    print(f"SCREEN TIME DATA: {data}")
+    parsed_data = parse_data(data)
+    print(f"PARSED DATA: {parsed_data}")
+
+    all_data = load_data()
+    date_missing = False
+
+    for entry in all_data:
+        if parsed_data["date"] == entry["date"]:
+            entry["steps"] = parsed_data["steps"]
+            entry["hours_slept"] = parsed_data["hours_slept"]
+            entry["screen_time"] = parsed_data["screen_time"]
+            date_missing = "FALSE"
+        
+        elif date_missing != "FALSE":
+            date_missing = True
+
+
+    if date_missing != "FALSE":
+        all_data.append({
+                        "date": parsed_data["date"],
+                        "steps": parsed_data["steps"],
+                        "hours_slept": parsed_data["hours_slept"],
+                        "screen_time": parsed_data["screen_time"]
+                    })
+
+    
+    print(f"""
+        RENEWED DATA:
+        {all_data}
+    """)
+    
+    with open(DATA_FILE, "w") as f:
+        json.dump(all_data, f,  indent= 4)
+    return jsonify({"screen time post": "success"}), 200
+
+@app.route('/debug-post', methods = ['POST'])
+def post_test_data():
+    data = request.get_data(as_text= True)
+    print(f"""TEST DATA GOTTEN
+          DATA: {data}""")
+    with open(TEST_FILE, "w", encoding= 'utf-8') as f:
+        f.write(data)
+    print(f"test: {data}")
+    return jsonify({"test post": "success"}), 200
+
+@app.route('/debug-get', methods = ['GET'])
+def get_debug_data():
+    with open(TEST_FILE, "r", encoding= 'utf-8') as f:
+        data = f.read()
+    return data, render_template('debug-get.html')
+
+
 
 
 # ── Run ─────────────────────────────────────────────────

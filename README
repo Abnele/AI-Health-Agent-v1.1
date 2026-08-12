@@ -15,14 +15,15 @@ Press CTRL+C to quit
  * Debugger is active!
  * Debugger PIN: [debugger pin]
 5. Open your browser
-6. Paste the url given on the second "*" under "WARNING..."
+6. Paste the url given on the second "*" under "WARNING..." into your browser
 
 HOW TO EXPORT HEALTH DATA
+The paywalled mid and outdated way:
 1. Install Health Auto Export from App Store
 2. Go to -> Automated -> New Automation
 3. Set Automation Type to REST API
 4. Get your IPv4 Address (See next guide below)
-5. Set your URL to -> http://[YOUR IPv4 ADDRESS]:5000/data
+5. Set your URL to -> http://[YOUR IPv4 ADDRESS]:5000/data/health-auto-export
 6. Set Data Type to Health Metrics
 7. In Select Metrics, select -> Sleep Analysis and Step Count
 8. Set Export Format to JSON
@@ -30,17 +31,24 @@ HOW TO EXPORT HEALTH DATA
 10. Choose the days you would like to export data from
 11. Select Begin export
 
+The Superior Free way:
+1. Get Apple shortcuts on your iphone
+2. Get this shortcut -> https://www.icloud.com/shortcuts/c3e9e3ce9d2245ba9f33bdaeb7b6bd5d
+3. Set the url at the bottom to http://[YOUR IPv4 ADDRESS]:5000/data/shortcut
+4. Run it, and you're done
+
 HOW TO GET YOUR IPv4 ADDRESS/URL:
-Easy way:
+Method 1:
 1. Run main.py
 2. Locate the THIRD "*" under "WARNING: This is..." on the terminal
 3. See that it says "Running on [PASTE THIS AS YOUR URL IN AUTO EXPORT]"
-Hard way:
+Method 2:
 1. Open windows powershell and run: "ipconfig"
 2. Look for IPv4 Address under your active WiFi adapter
 3. Copy the IPv4 Address to your clipboard
 
 NOTE:
-* Health Auto Export cannot export screen time data. As of now, you must enter it manually in the web app.
+* Health Auto Export cannot export screen time data. As of now, you must enter it manually in the web app if you go that route.
 * If you do not have sleep data for an exported day, it will default to 0; to change that, add sleep data in your iphone Health app or enter it in the website.
 * If your free trial on Health Auto Export runs out, uninstall and reinstall the app, and it should reset.
+* You need a gemini API key to use the AI. The terminal will give you instructions on how to do so when you first run the program.

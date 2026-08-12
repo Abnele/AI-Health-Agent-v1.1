@@ -234,24 +234,3 @@ async function deleteDay(date) {
     if (deleteRes.ok) alert('Day Deleted!');
     refreshHistory();
 }
-
-async function resetExportAlert() {
-
-    // Yo bro you need to read alert.json and overwrite it to false using JS
-    // That's what this function should do
-    // Idk if the alert_file parameter is needed
-    // Put it there just in case
-    // Nvm not needed
-    
-    const alertRes = await fetch('/communications');
-    const alert = await alertRes.json();
-
-    await fetch('/communications', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({"auto_export_data_added?": false})
-    })
-
-
-
-}

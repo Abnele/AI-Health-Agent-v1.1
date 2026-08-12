@@ -2,10 +2,12 @@
 from input import load_data
 from statistics import mean
 from datetime import datetime, timedelta
+from ast import literal_eval
 import json
 import os
 import traceback
 import google.genai as genai
+
 
 
 # Directories
@@ -103,6 +105,7 @@ def analyze():
 
 
     # DEPRECATED AND SOON TO BE REMOVED
+    # Use only if AI is in high demand and unresponsive
     # if (report_type == "WEEKLY"):
     #     return make_weekly_advice(weekly_data, dataAverage, goals, advice), report_type
     # else:
@@ -123,7 +126,79 @@ def analyze():
     return advice, report_type
     
 
-def make_weekly_advice(weekly_data, dataAverage, goals, advice):
+def get_ai_advice(data, goals, report_type):
+    # Prompts Gemini to give advice to the user
+    prompt = f"""
+        You are a personal health coach. Analyze this user's health data and give specific, actionable advice in 3-5 bullet points. Be encouraging but honest   
+        Report type: {report_type}
+        User Goals: {goals}
+        Health Data: {data}
+        Keep advice concise and practical. Focus on what they can improve today.
+    """
+
+    response = client.models.generate_content(
+        model = "gemini-3.1-flash-lite",
+        contents = prompt)
+    
+    print(f"RESPONSE: {response.text}")
+    return response.text
+
+
+def parse_data(data):
+    date_time = data["date"]
+    step_list = data["steps"]
+    sleep_list = [item[:4] for item in data["hours_slept"]]
+    screen_time= data["screen_time"]
+    
+
+    # Parse Date
+    date_time = date_time.replace('\u202f', ' ')
+    parsed_date = datetime.strptime(date_time, "%b %d, %Y at %I:%M %p")
+    month = f"0{parsed_date.month}" if parsed_date.month<10 else f"{parsed_date.month}"
+    day = f"0{parsed_date.day}" if parsed_date.day<10 else f"{parsed_date.day}"      
+    year = f"0{parsed_date.year}" if parsed_date.year<10 else f"{parsed_date.year}" 
+
+    # Parse Steps
+    step_list = [int(item) for item in step_list]
+    steps=0
+    for item in step_list:
+        steps+=item
+
+    # Parse Sleep 
+    try:
+        sleep_hr = sleep_list[0].split(':')[0]
+        sleep_min = sleep_list[0].split(':')[1]
+        hours_slept = (float(sleep_hr) + (float(sleep_min)/60)).__round__(2)
+    except IndexError:
+        print(f"\n\n\n****************DISCAIMER****************\nNo sleep data detected; will default to 0\nYou can change it manually in the website or by exporting the same day again with sleep data")
+        print("\n\n\n")
+        hours_slept = 0
+
+
+    # Parse Screen Time
+    screen_time = screen_time.replace(' hr\n',' ').replace(' hr','')
+    hour_list = screen_time.split(' ')
+    screen_time = 0
+    for item in hour_list:
+        screen_time += float(item)
+    screen_time = screen_time.__round__(2)
+    
+
+
+    parsed_data = {
+        "date": f"{year}-{month}-{day}",
+        "steps": steps,
+        "hours_slept": hours_slept,
+        "screen_time": screen_time
+    }
+    return parsed_data
+    
+
+
+
+
+
+def make_weekly_advice_DEPRECATED(weekly_data, dataAverage, goals, advice):
         past_x_days = 0
         previous_day = None
         
@@ -228,20 +303,3 @@ def make_weekly_advice(weekly_data, dataAverage, goals, advice):
             advice.append("You've been keeping up with your goals. Keep it up.")
 
         return advice
-
-def get_ai_advice(data, goals, report_type):
-    # Prompts Gemini to give advice to the user
-    prompt = f"""
-        You are a personal health coach. Analyze this user's health data and give specific, actionable advice in 3-5 bullet points. Be encouraging but honest   
-        Report type: {report_type}
-        User Goals: {goals}
-        Health Data: {data}
-        Keep advice concise and practical. Focus on what they can improve today.
-    """
-
-    response = client.models.generate_content(
-        model = "gemini-3.1-flash-lite",
-        contents = prompt)
-    
-    print(f"RESPONSE: {response.text}")
-    return response.text
