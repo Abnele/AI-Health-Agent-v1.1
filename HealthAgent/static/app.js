@@ -14,9 +14,9 @@ window.onload = async () => {
     const goals = await res.json()
     
     
-    if (goals.steps)        document.getElementById('goal-steps').value = goals.steps
-    if (goals.hours_slept)  document.getElementById('goal-sleep').value = goals.hours_slept
-    if (goals.screen_time)  document.getElementById('goal-screen').value = goals.screen_time
+    if (goals.steps)        document.getElementById('goal-steps').value = goals.steps;
+    if (goals.hours_slept)  document.getElementById('goal-sleep').value = goals.hours_slept;
+    if (goals.screen_time)  document.getElementById('goal-screen').value = goals.screen_time;
 
     // Check for exports
     const eventSource = new EventSource('/stream');
@@ -36,6 +36,17 @@ window.onload = async () => {
     eventSource.onerror = () => {
         console.log('SSE connection lost connection, will retry automatically...');
     };
+
+    // Dark mode settings
+    let darkmode = localStorage.getItem('darkmode');
+    const themeSwitcher = document.getElementById('theme-switcher');
+
+    if (darkmode === 'active') enableDarkmode();
+
+    themeSwitcher.addEventListener("click", () => {
+        darkmode = localStorage.getItem('darkmode');
+        darkmode !== "active" ? enableDarkmode() : disableDarkmode()
+    })
 
     
 
@@ -69,7 +80,7 @@ async function addData() {
     let null_response = false;
     for (entry of Object.values(data_today)) {
         console.log(entry);
-        if (!entry) {
+        if (entry === null || entry === undefined || isNan(entry)) {
             null_response = true;
         }
 
@@ -233,4 +244,14 @@ async function deleteDay(date) {
     const deleteRes = await fetch(`/data/${date}`, {method : 'DELETE'});
     if (deleteRes.ok) alert('Day Deleted!');
     refreshHistory();
+}
+
+async function enableDarkmode(){
+    document.body.classList.add('darkmode');
+    localStorage.setItem('darkmode', 'active');
+}
+
+async function disableDarkmode() {
+    document.body.classList.remove('darkmode');
+    localStorage.setItem('darkmode', null);
 }
