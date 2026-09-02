@@ -32,8 +32,8 @@ The paywalled mid and outdated way:
 11. Select Begin export
 
 The Superior Free way:
-1. Get Apple shortcuts on your iphone
-2. Get this shortcut -> https://www.icloud.com/shortcuts/c3e9e3ce9d2245ba9f33bdaeb7b6bd5d
+1. Get Apple shortcuts on your iPhone
+2. Get this shortcut -> https://www.icloud.com/shortcuts/c67272053c8244ddbf8cf2b750f741f5
 3. Set the url at the bottom to http://[YOUR IPv4 ADDRESS]:5000/data/shortcut
 4. Run it, and you're done
 
@@ -43,7 +43,7 @@ Method 1:
 2. Locate the THIRD "*" under "WARNING: This is..." on the terminal
 3. See that it says "Running on [PASTE THIS AS YOUR URL IN AUTO EXPORT]"
 Method 2:
-1. Open windows powershell and run: "ipconfig"
+1. Open Windows PowerShell and run: "ipconfig"
 2. Look for IPv4 Address under your active WiFi adapter
 3. Copy the IPv4 Address to your clipboard
 
@@ -51,4 +51,4 @@ NOTE:
 * Health Auto Export cannot export screen time data. As of now, you must enter it manually in the web app if you go that route.
 * If you do not have sleep data for an exported day, it will default to 0; to change that, add sleep data in your iphone Health app or enter it in the website.
 * If your free trial on Health Auto Export runs out, uninstall and reinstall the app, and it should reset.
-* You need a gemini API key to use the AI. The terminal will give you instructions on how to do so when you first run the program.
+* You need a Gemini API key to use the AI. The terminal will give you instructions on how to do so when you first run the program.
